@@ -1,0 +1,146 @@
+/* ════════════════════════════════════════════════
+   theme.css  —  CSS variables for light & dark mode
+   Applied via:  document.documentElement[data-theme="dark"]
+   ════════════════════════════════════════════════ */
+
+/* ── Light mode (default) ── */
+:root {
+  /* Backgrounds */
+  --bg-primary:      #ffffff;
+  --bg-secondary:    #f8fafc;
+  --bg-tertiary:     #f1f5f9;
+  --bg-card:         #ffffff;
+  --bg-overlay:      rgba(255, 255, 255, 0.85);
+
+  /* Text */
+  --text-primary:    #0f172a;
+  --text-secondary:  #334155;
+  --text-muted:      #64748b;
+  --text-faint:      #94a3b8;
+
+  /* Borders */
+  --border:          #e2e8f0;
+  --border-strong:   #cbd5e1;
+
+  /* Accent (indigo/purple) */
+  --accent:          #6366f1;
+  --accent-hover:    #4f46e5;
+  --accent-light:    #eef2ff;
+  --accent-2:        #a855f7;
+
+  /* Navbar */
+  --nav-bg:          rgba(255, 255, 255, 0.9);
+  --nav-shadow:      0 1px 16px rgba(0,0,0,0.06);
+
+  /* Hero */
+  --hero-bg:         linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --hero-text:       #ffffff;
+
+  /* Skills */
+  --skill-card-bg:   #ffffff;
+  --skill-bar-bg:    #e2e8f0;
+  --skill-bar-fill:  linear-gradient(90deg, #6366f1, #a78bfa);
+
+  /* Projects */
+  --project-card-bg: #ffffff;
+  --project-overlay: rgba(15, 23, 42, 0.75);
+
+  /* Contact */
+  --input-bg:        #f8fafc;
+  --input-border:    #e2e8f0;
+  --input-focus:     #6366f1;
+
+  /* Footer */
+  --footer-bg:       #0f172a;
+  --footer-text:     #94a3b8;
+
+  /* Shadows */
+  --shadow-sm:       0 1px 4px rgba(0,0,0,0.06);
+  --shadow-md:       0 4px 16px rgba(0,0,0,0.08);
+  --shadow-lg:       0 8px 32px rgba(0,0,0,0.10);
+
+  /* Transitions */
+  --transition:      0.3s ease;
+}
+
+/* ── Dark mode ── */
+[data-theme="dark"] {
+  /* Backgrounds */
+  --bg-primary:      #0f172a;
+  --bg-secondary:    #1e293b;
+  --bg-tertiary:     #0f172a;
+  --bg-card:         #1e293b;
+  --bg-overlay:      rgba(15, 23, 42, 0.9);
+
+  /* Text */
+  --text-primary:    #f1f5f9;
+  --text-secondary:  #cbd5e1;
+  --text-muted:      #94a3b8;
+  --text-faint:      #475569;
+
+  /* Borders */
+  --border:          #1e293b;
+  --border-strong:   #334155;
+
+  /* Accent */
+  --accent:          #818cf8;
+  --accent-hover:    #6366f1;
+  --accent-light:    rgba(99,102,241,0.12);
+  --accent-2:        #c084fc;
+
+  /* Navbar */
+  --nav-bg:          rgba(15, 23, 42, 0.95);
+  --nav-shadow:      0 1px 16px rgba(0,0,0,0.3);
+
+  /* Hero — same gradient, looks good on dark */
+  --hero-bg:         linear-gradient(135deg, #3730a3 0%, #6d28d9 100%);
+  --hero-text:       #ffffff;
+
+  /* Skills */
+  --skill-card-bg:   #1e293b;
+  --skill-bar-bg:    #334155;
+  --skill-bar-fill:  linear-gradient(90deg, #6366f1, #a78bfa);
+
+  /* Projects */
+  --project-card-bg: #1e293b;
+  --project-overlay: rgba(0,0,0,0.85);
+
+  /* Contact */
+  --input-bg:        #0f172a;
+  --input-border:    #334155;
+  --input-focus:     #818cf8;
+
+  /* Footer — already dark, just slightly lighter */
+  --footer-bg:       #020617;
+  --footer-text:     #64748b;
+
+  /* Shadows — more pronounced on dark */
+  --shadow-sm:       0 1px 4px rgba(0,0,0,0.3);
+  --shadow-md:       0 4px 16px rgba(0,0,0,0.4);
+  --shadow-lg:       0 8px 32px rgba(0,0,0,0.5);
+}
+
+/* ── Global base styles using variables ── */
+* { box-sizing: border-box; }
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color var(--transition), color var(--transition);
+}
+
+/* Smooth theme transition on every element */
+*,
+*::before,
+*::after {
+  transition: background-color 0.3s ease,
+              border-color 0.3s ease,
+              color 0.2s ease,
+              box-shadow 0.3s ease;
+}
+
+/* ── Scrollbar (dark mode) ── */
+[data-theme="dark"] ::-webkit-scrollbar { width: 8px; }
+[data-theme="dark"] ::-webkit-scrollbar-track  { background: #0f172a; }
+[data-theme="dark"] ::-webkit-scrollbar-thumb  { background: #334155; border-radius: 4px; }
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover { background: #475569; }

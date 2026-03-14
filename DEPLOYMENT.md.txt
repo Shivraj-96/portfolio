@@ -1,0 +1,219 @@
+# 🚀 Deployment Guide
+
+## Overview
+```
+MongoDB Atlas  ←  data store (cloud DB)
+      ↑
+Render.com     ←  backend (Node/Express)
+      ↑
+Vercel         ←  frontend (React/Vite)
+```
+
+---
+
+## STEP 1 — MongoDB Atlas (Cloud Database)
+
+### 1.1 Create account
+Go to https://www.mongodb.com/atlas and sign up (free tier).
+
+### 1.2 Create a cluster
+- Click **Build a Database** → choose **Free (M0)**
+- Provider: AWS, Region: Mumbai (ap-south-1) — closest to India
+- Cluster name: `portfolio-cluster` → click **Create**
+
+### 1.3 Create database user
+- Left menu → **Database Access** → **Add New Database User**
+- Username: `portfolioUser`
+- Password: click **Autogenerate** → copy it immediately
+- Role: **Atlas admin** → click **Add User**
+
+### 1.4 Allow all IPs (required for Render)
+- Left menu → **Network Access** → **Add IP Address**
+- Click **Allow Access From Anywhere** → confirms `0.0.0.0/0`
+- Click **Confirm**
+
+### 1.5 Get connection string
+- Left menu → **Database** → click **Connect** on your cluster
+- Choose **Drivers** → Driver: Node.js
+- Copy the connection string — looks like:
+  ```
+  mongodb+srv://portfolioUser:<password>@cluster0.abc12.mongodb.net/?retryWrites=true&w=majority
+  ```
+- Replace `<password>` with the password you copied in step 1.3
+- Add your database name before `?`:
+  ```
+  mongodb+srv://portfolioUser:yourpassword@cluster0.abc12.mongodb.net/portfolio?retryWrites=true&w=majority
+  ```
+- Save this — you'll need it in Step 2
+
+---
+
+## STEP 2 — Deploy Backend to Render
+
+### 2.1 Push code to GitHub
+```bash
+# From PortfolioProject root
+git init
+git add .
+git commit -m "initial commit"
+```
+Create a new repo on github.com, then:
+```bash
+git remote add origin https://github.com/YOUR_USERNAME/portfolio.git
+git push -u origin main
+```
+
+### 2.2 Create Render Web Service
+- Go to https://render.com → Sign up with GitHub
+- Click **New +** → **Web Service**
+- Connect your GitHub repo
+- Configure:
+  | Field | Value |
+  |---|---|
+  | Name | `portfolio-backend` |
+  | Region | Singapore |
+  | Branch | `main` |
+  | Root Directory | `server` |
+  | Runtime | `Node` |
+  | Build Command | `npm install` |
+  | Start Command | `node server.js` |
+  | Plan | Free |
+
+### 2.3 Add environment variables
+In Render dashboard → **Environment** tab → add each one:
+
+| Key | Value |
+|---|---|
+| `MONGODB_URI` | your Atlas connection string from Step 1.5 |
+| `JWT_SECRET` | any long random string e.g. `xK9#mP2$qL7@nR4` |
+| `JWT_EXPIRES_IN` | `7d` |
+| `EMAIL_USER` | `shivshinde941@gmail.com` |
+| `EMAIL_PASS` | your Gmail App Password |
+| `HCAPTCHA_SECRET` | your hCaptcha secret key |
+| `NODE_ENV` | `production` |
+| `FRONTEND_URL` | leave blank for now — add after Step 3 |
+
+### 2.4 Deploy
+Click **Create Web Service** — Render will build and deploy.
+After ~2 minutes your backend URL will be:
+```
+https://portfolio-backend.onrender.com
+```
+Test it: open `https://portfolio-backend.onrender.com/api/health`
+Should return: `{"status":"ok","mongo":"connected"}`
+
+---
+
+## STEP 3 — Deploy Frontend to Vercel
+
+### 3.1 Update API URL in frontend
+Create `client/Protfolio/.env.production`:
+```env
+VITE_API_URL=https://portfolio-backend.onrender.com
+VITE_HCAPTCHA_SITEKEY=your_real_hcaptcha_site_key
+```
+
+### 3.2 Update all fetch calls to use env variable
+In any component that calls the API, replace hardcoded URLs:
+```js
+// ❌ Before
+fetch('http://localhost:5000/api/skills')
+
+// ✅ After
+fetch(`${import.meta.env.VITE_API_URL}/api/skills`)
+```
+
+### 3.3 Deploy to Vercel
+- Go to https://vercel.com → sign up with GitHub
+- Click **Add New** → **Project**
+- Import your GitHub repo
+- Configure:
+  | Field | Value |
+  |---|---|
+  | Framework Preset | Vite |
+  | Root Directory | `client/Protfolio` |
+  | Build Command | `npm run build` |
+  | Output Directory | `dist` |
+
+### 3.4 Add environment variables in Vercel
+In Vercel → **Settings** → **Environment Variables**:
+
+| Key | Value |
+|---|---|
+| `VITE_API_URL` | `https://portfolio-backend.onrender.com` |
+| `VITE_HCAPTCHA_SITEKEY` | your real hCaptcha site key |
+
+### 3.5 Deploy
+Click **Deploy** — Vercel builds and deploys in ~1 minute.
+Your frontend URL will be:
+```
+https://your-project.vercel.app
+```
+
+---
+
+## STEP 4 — Connect frontend URL back to backend
+
+### 4.1 Update FRONTEND_URL on Render
+- Render dashboard → your service → **Environment**
+- Update `FRONTEND_URL` = `https://your-project.vercel.app`
+- Click **Save Changes** → Render auto-redeploys
+
+### 4.2 Update SEO.jsx with real domain
+```js
+const SITE_URL = 'https://your-project.vercel.app';
+```
+Commit and push — Vercel auto-redeploys.
+
+---
+
+## STEP 5 — Verify everything works
+
+Open these URLs in browser — all should return data:
+
+```
+https://portfolio-backend.onrender.com/api/health
+https://portfolio-backend.onrender.com/api/skills
+https://portfolio-backend.onrender.com/api/projects
+https://your-project.vercel.app/
+https://your-project.vercel.app/admin
+```
+
+---
+
+## ⚠️  Free tier limitations
+
+| Platform | Limitation | Solution |
+|---|---|---|
+| Render free | Server sleeps after 15min inactivity — first request takes ~30s | Upgrade to $7/mo Starter plan |
+| MongoDB Atlas | 512MB storage free | More than enough for a portfolio |
+| Vercel free | 100GB bandwidth/month | Way more than enough |
+
+---
+
+## Quick reference — all env variables
+
+### server/.env (local) and Render Environment (production)
+```env
+PORT=5000
+NODE_ENV=production
+MONGODB_URI=mongodb+srv://...
+JWT_SECRET=your_long_secret
+JWT_EXPIRES_IN=7d
+EMAIL_USER=your@gmail.com
+EMAIL_PASS=xxxx xxxx xxxx xxxx
+HCAPTCHA_SECRET=your_secret
+FRONTEND_URL=https://your-project.vercel.app
+```
+
+### client/Protfolio/.env (local)
+```env
+VITE_API_URL=http://localhost:5000
+VITE_HCAPTCHA_SITEKEY=10000000-ffff-ffff-ffff-000000000001
+```
+
+### client/Protfolio/.env.production (Vercel)
+```env
+VITE_API_URL=https://portfolio-backend.onrender.com
+VITE_HCAPTCHA_SITEKEY=your_real_sitekey
+```

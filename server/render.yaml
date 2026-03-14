@@ -1,0 +1,31 @@
+# render.yaml
+# Place this file at: server/render.yaml
+# Render auto-detects this file when you connect your repo
+
+services:
+  - type: web
+    name: portfolio-backend
+    env: node
+    region: singapore          # closest to India
+    plan: free
+    rootDir: server            # tells Render where server code lives
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000           # Render assigns this automatically
+      # Set these manually in Render dashboard → Environment:
+      - key: MONGODB_URI
+        sync: false            # means: set it manually, don't commit value
+      - key: JWT_SECRET
+        sync: false
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: EMAIL_USER
+        sync: false
+      - key: EMAIL_PASS
+        sync: false
+      - key: HCAPTCHA_SECRET
+        sync: false
