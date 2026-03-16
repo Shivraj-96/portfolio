@@ -1,6 +1,8 @@
 import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { useAuth } from './hooks/useAuth';
 import SEO, { SEO_PAGES } from './components/SEO';
+import GoogleAnalytics from './components/Analytics';
+import { usePerformance } from './hooks/usePerformance';
 
 import './theme.css';
 import './animations.css';
@@ -9,7 +11,6 @@ import './App.css';
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
-// ── Lazy-loaded components ────────────────────────────────────────
 const Navbar         = lazy(() => import('./components/Navbar'));
 const Hero           = lazy(() => import('./components/Hero'));
 const Skills         = lazy(() => import('./components/Skills'));
@@ -28,8 +29,7 @@ function PageLoader() {
       color: 'var(--text-muted)', fontFamily: 'Sora, sans-serif',
       gap: '12px', fontSize: '0.95rem',
     }}>
-      <i className="fas fa-spinner fa-spin"
-        style={{ fontSize: '1.3rem', color: 'var(--accent)' }} />
+      <i className="fas fa-spinner fa-spin" style={{ fontSize: '1.3rem', color: 'var(--accent)' }} />
       Loading...
     </div>
   );
@@ -57,6 +57,9 @@ function App() {
 
   const { user, login, logout } = useAuth();
   const isAdminRoute = window.location.pathname === '/admin';
+
+  // Performance monitoring (Web Vitals → GA)
+  usePerformance();
 
   // Scroll spy
   useEffect(() => {
@@ -86,7 +89,7 @@ function App() {
     return () => observer.disconnect();
   }, [loading]);
 
-  // Fetch all data
+  // Fetch data
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -107,10 +110,10 @@ function App() {
     fetchData();
   }, []);
 
-  // Admin route
   if (isAdminRoute) {
     return (
       <>
+        <GoogleAnalytics />
         <SEO {...SEO_PAGES.admin} />
         <Suspense fallback={<PageLoader />}>
           {user?.role === 'admin'
@@ -122,10 +125,10 @@ function App() {
     );
   }
 
-  // Auth gate
   if (!user) {
     return (
       <>
+        <GoogleAnalytics />
         <SEO {...SEO_PAGES.home} />
         <Suspense fallback={<PageLoader />}>
           <Login onLogin={u => login(u, localStorage.getItem('token'))} />
@@ -140,6 +143,7 @@ function App() {
 
   return (
     <div className="App">
+      <GoogleAnalytics />
       <SEO title={seo.title} description={seo.description} url={seo.url} />
 
       <Suspense fallback={null}>

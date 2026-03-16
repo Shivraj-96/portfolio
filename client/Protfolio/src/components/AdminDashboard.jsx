@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import "./AdminDashboard.css";
 import SkillsManager    from "./SkillsManager";
 import ProjectsManager  from "./ProjectsManager";
+import VisitorStats from './VisitorStats';
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -12,6 +13,8 @@ const NAV_ITEMS = [
   { id: "messages",  label: "Messages",  icon: "fas fa-envelope" },
   { id: "profile",   label: "Profile",   icon: "fas fa-user" },
 ];
+
+{activeTab === "messages" && <VisitorStats />}
 
 export default function AdminDashboard({ user, onLogout }) {
   const [activeTab, setActiveTab] = useState("overview");
