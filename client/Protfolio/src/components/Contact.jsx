@@ -4,6 +4,8 @@ import "./Contact.css";
 
 const INITIAL = { name: "", email: "", subject: "", message: "" };
 
+const API = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 // ── THIS IS THE ONLY PLACE validate() should be ──────────────────
 function validate(fields) {
   const errors = {};

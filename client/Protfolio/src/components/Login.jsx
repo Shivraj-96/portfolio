@@ -1,27 +1,28 @@
-import { useState } from "react";
-import "./Login.css";
+import { useState } from 'react';
+import './Login.css';
+
+const API = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 export default function Login({ onLogin }) {
   const [isRegister, setIsRegister] = useState(false);
-  const [form, setForm]             = useState({ name: "", email: "", password: "" });
-  const [errors, setErrors]         = useState({});
-  const [status, setStatus]         = useState(null); // "loading" | "error"
-  const [errorMsg, setErrorMsg]     = useState("");
+  const [form, setForm]   = useState({ name: '', email: '', password: '' });
+  const [errors, setErrors] = useState({});
+  const [status, setStatus] = useState(null);
+  const [errMsg, setErrMsg] = useState('');
 
   const validate = () => {
     const e = {};
-    if (isRegister && !form.name.trim())  e.name     = "Name is required.";
-    if (!form.email.trim())               e.email    = "Email is required.";
-    else if (!/\S+@\S+\.\S+/.test(form.email)) e.email = "Invalid email.";
-    if (!form.password)                   e.password = "Password is required.";
-    else if (form.password.length < 6)    e.password = "Min 6 characters.";
+    if (isRegister && !form.name.trim()) e.name = 'Name is required.';
+    if (!form.email.trim())    e.email    = 'Email is required.';
+    if (!form.password.trim()) e.password = 'Password is required.';
+    if (form.password.length < 6) e.password = 'Minimum 6 characters.';
     return e;
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setForm((p) => ({ ...p, [name]: value }));
-    if (errors[name]) setErrors((p) => ({ ...p, [name]: "" }));
+    setForm(p => ({ ...p, [name]: value }));
+    if (errors[name]) setErrors(p => ({ ...p, [name]: '' }));
   };
 
   const handleSubmit = async (e) => {
@@ -29,119 +30,93 @@ export default function Login({ onLogin }) {
     const v = validate();
     if (Object.keys(v).length) { setErrors(v); return; }
 
-    setStatus("loading");
-    setErrorMsg("");
-
-    const endpoint = isRegister
-      ? "http://localhost:5000/api/auth/register"
-      : "http://localhost:5000/api/auth/login";
-
+    setStatus('loading'); setErrMsg('');
     try {
-      const res  = await fetch(endpoint, {
-        method:  "POST",
-        headers: { "Content-Type": "application/json" },
+      const endpoint = isRegister ? 'register' : 'login';
+      const res  = await fetch(`${API}/api/auth/${endpoint}`, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify(form),
       });
       const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Something went wrong.');
 
-      if (!res.ok) throw new Error(data.error || "Something went wrong.");
-
-      // Save token to localStorage
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("user",  JSON.stringify(data.user));
-
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user',  JSON.stringify(data.user));
       setStatus(null);
-      if (onLogin) onLogin(data.user);
+      if (onLogin) onLogin(data.user, data.token);
     } catch (err) {
-      setErrorMsg(err.message);
-      setStatus("error");
+      setErrMsg(err.message);
+      setStatus('error');
     }
   };
 
   return (
-    <div className="auth-overlay">
-      <div className="auth-card">
-
-        {/* Logo / Title */}
-        <div className="auth-header">
-          <div className="auth-logo"><i className="fas fa-code"></i></div>
-          <h2>{isRegister ? "Create Account" : "Welcome Back"}</h2>
-          <p>{isRegister ? "Register to manage your portfolio" : "Login to your portfolio dashboard"}</p>
+    <div className="login-page">
+      <div className="login-card">
+        <div className="login-header">
+          <div className="login-avatar"><i className="fas fa-user"></i></div>
+          <h2>{isRegister ? 'Create Account' : 'Welcome Back'}</h2>
+          <p>{isRegister ? 'Sign up to access your portfolio' : 'Sign in to your portfolio'}</p>
         </div>
 
-        {/* Error banner */}
-        {status === "error" && (
-          <div className="auth-error">
-            <i className="fas fa-exclamation-circle"></i> {errorMsg}
+        {status === 'error' && (
+          <div className="login-error">
+            <i className="fas fa-exclamation-triangle"></i> {errMsg}
           </div>
         )}
 
         <form onSubmit={handleSubmit} noValidate>
-
-          {/* Name — register only */}
           {isRegister && (
-            <div className="auth-group">
+            <div className="login-field">
               <label>Full Name</label>
-              <div className="input-wrap">
+              <div className="login-input-wrap">
                 <i className="fas fa-user"></i>
-                <input
-                  type="text" name="name"
-                  placeholder="Shivraj Shinde"
+                <input type="text" name="name" placeholder="Shivraj Shinde"
                   value={form.name} onChange={handleChange}
-                  className={errors.name ? "err" : ""}
-                />
+                  className={errors.name ? 'err' : ''} />
               </div>
               {errors.name && <span className="err-msg">{errors.name}</span>}
             </div>
           )}
 
-          {/* Email */}
-          <div className="auth-group">
-            <label>Email</label>
-            <div className="input-wrap">
+          <div className="login-field">
+            <label>Email Address</label>
+            <div className="login-input-wrap">
               <i className="fas fa-envelope"></i>
-              <input
-                type="email" name="email"
-                placeholder="shivraj@example.com"
+              <input type="email" name="email" placeholder="you@example.com"
                 value={form.email} onChange={handleChange}
-                className={errors.email ? "err" : ""}
-              />
+                className={errors.email ? 'err' : ''} />
             </div>
             {errors.email && <span className="err-msg">{errors.email}</span>}
           </div>
 
-          {/* Password */}
-          <div className="auth-group">
+          <div className="login-field">
             <label>Password</label>
-            <div className="input-wrap">
+            <div className="login-input-wrap">
               <i className="fas fa-lock"></i>
-              <input
-                type="password" name="password"
-                placeholder="••••••••"
+              <input type="password" name="password" placeholder="••••••••"
                 value={form.password} onChange={handleChange}
-                className={errors.password ? "err" : ""}
-              />
+                className={errors.password ? 'err' : ''} />
             </div>
             {errors.password && <span className="err-msg">{errors.password}</span>}
           </div>
 
-          {/* Submit */}
-          <button type="submit" className="auth-btn" disabled={status === "loading"}>
-            {status === "loading"
+          <button type="submit" className="login-btn" disabled={status === 'loading'}>
+            {status === 'loading'
               ? <><i className="fas fa-spinner fa-spin"></i> Please wait...</>
-              : isRegister ? "Create Account" : "Login"
+              : <><i className={`fas fa-${isRegister ? 'user-plus' : 'sign-in-alt'}`}></i>
+                  {isRegister ? 'Create Account' : 'Sign In'}</>
             }
           </button>
         </form>
 
-        {/* Toggle register / login */}
-        <p className="auth-switch">
-          {isRegister ? "Already have an account?" : "Don't have an account?"}
-          <button onClick={() => { setIsRegister(!isRegister); setErrors({}); setErrorMsg(""); }}>
-            {isRegister ? " Login" : " Register"}
+        <p className="login-toggle">
+          {isRegister ? 'Already have an account?' : "Don't have an account?"}
+          <button onClick={() => { setIsRegister(!isRegister); setErrors({}); setErrMsg(''); }}>
+            {isRegister ? 'Sign In' : 'Register'}
           </button>
         </p>
-
       </div>
     </div>
   );

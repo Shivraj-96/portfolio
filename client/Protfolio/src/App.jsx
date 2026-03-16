@@ -7,7 +7,9 @@ import './animations.css';
 import './responsive.css';
 import './App.css';
 
-// ── ONLY lazy imports here — no regular component imports above ───
+const API = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
+// ── Lazy-loaded components ────────────────────────────────────────
 const Navbar         = lazy(() => import('./components/Navbar'));
 const Hero           = lazy(() => import('./components/Hero'));
 const Skills         = lazy(() => import('./components/Skills'));
@@ -56,7 +58,7 @@ function App() {
   const { user, login, logout } = useAuth();
   const isAdminRoute = window.location.pathname === '/admin';
 
-  // ── Scroll spy: update SEO meta as user scrolls ──────────────
+  // Scroll spy
   useEffect(() => {
     if (loading) return;
     const SECTIONS = ['home', 'skills', 'projects', 'contact'];
@@ -73,7 +75,7 @@ function App() {
     return () => window.removeEventListener('scroll', onScroll);
   }, [loading]);
 
-  // ── Scroll reveal ─────────────────────────────────────────────
+  // Scroll reveal
   useEffect(() => {
     if (loading) return;
     const observer = new IntersectionObserver(
@@ -84,14 +86,14 @@ function App() {
     return () => observer.disconnect();
   }, [loading]);
 
-  // ── Fetch all data ────────────────────────────────────────────
+  // Fetch all data
   useEffect(() => {
     const fetchData = async () => {
       try {
         const [profileRes, skillsRes, projectsRes] = await Promise.all([
-          fetch('http://localhost:5000/api/profile').then(r => r.json()),
-          fetch('http://localhost:5000/api/skills').then(r => r.json()),
-          fetch('http://localhost:5000/api/projects').then(r => r.json()),
+          fetch(`${API}/api/profile`).then(r => r.json()),
+          fetch(`${API}/api/skills`).then(r => r.json()),
+          fetch(`${API}/api/projects`).then(r => r.json()),
         ]);
         setProfile(profileRes);
         setSkills(Array.isArray(skillsRes)     ? skillsRes    : []);
@@ -105,7 +107,7 @@ function App() {
     fetchData();
   }, []);
 
-  // ── Admin route ───────────────────────────────────────────────
+  // Admin route
   if (isAdminRoute) {
     return (
       <>
@@ -120,7 +122,7 @@ function App() {
     );
   }
 
-  // ── Auth gate ─────────────────────────────────────────────────
+  // Auth gate
   if (!user) {
     return (
       <>
@@ -134,7 +136,6 @@ function App() {
 
   if (loading) return <PageLoader />;
 
-  // ── Main portfolio ────────────────────────────────────────────
   const seo = SEO_PAGES[activePage] || SEO_PAGES.home;
 
   return (

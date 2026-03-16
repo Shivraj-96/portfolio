@@ -9,6 +9,8 @@ const STATUS_META = {
   "planned":     { label: "Planned",     color: "#0284c7", bg: "#e0f2fe", icon: "fas fa-clock" },
 };
 
+const API = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 const EMPTY_FORM = {
   title: "", description: "", techStack: [],
   githubLink: "", liveLink: "", image: "", status: "completed",
