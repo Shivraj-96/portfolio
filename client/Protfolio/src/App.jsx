@@ -11,13 +11,13 @@ import './App.css';
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
+// ── Lazy-loaded components (NO Login import here) ─────────────────
 const Navbar         = lazy(() => import('./components/Navbar'));
 const Hero           = lazy(() => import('./components/Hero'));
 const Skills         = lazy(() => import('./components/Skills'));
 const Projects       = lazy(() => import('./components/Projects'));
 const Contact        = lazy(() => import('./components/Contact'));
 const Footer         = lazy(() => import('./components/Footer'));
-const Login          = lazy(() => import('./components/Login'));
 const AdminLogin     = lazy(() => import('./components/AdminLogin'));
 const AdminDashboard = lazy(() => import('./components/AdminDashboard'));
 
@@ -29,7 +29,8 @@ function PageLoader() {
       color: 'var(--text-muted)', fontFamily: 'Sora, sans-serif',
       gap: '12px', fontSize: '0.95rem',
     }}>
-      <i className="fas fa-spinner fa-spin" style={{ fontSize: '1.3rem', color: 'var(--accent)' }} />
+      <i className="fas fa-spinner fa-spin"
+        style={{ fontSize: '1.3rem', color: 'var(--accent)' }} />
       Loading...
     </div>
   );
@@ -58,10 +59,10 @@ function App() {
   const { user, login, logout } = useAuth();
   const isAdminRoute = window.location.pathname === '/admin';
 
-  // Performance monitoring (Web Vitals → GA)
+  // Performance monitoring
   usePerformance();
 
-  // Scroll spy
+  // Scroll spy — updates SEO title as user scrolls
   useEffect(() => {
     if (loading) return;
     const SECTIONS = ['home', 'skills', 'projects', 'contact'];
@@ -78,18 +79,20 @@ function App() {
     return () => window.removeEventListener('scroll', onScroll);
   }, [loading]);
 
-  // Scroll reveal
+  // Scroll reveal animations
   useEffect(() => {
     if (loading) return;
     const observer = new IntersectionObserver(
-      entries => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); }),
+      entries => entries.forEach(e => {
+        if (e.isIntersecting) e.target.classList.add('visible');
+      }),
       { threshold: 0.1 }
     );
     document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
     return () => observer.disconnect();
   }, [loading]);
 
-  // Fetch data
+  // Fetch all portfolio data
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -110,6 +113,7 @@ function App() {
     fetchData();
   }, []);
 
+  // ── Admin route: /admin ───────────────────────────────────────
   if (isAdminRoute) {
     return (
       <>
@@ -125,18 +129,7 @@ function App() {
     );
   }
 
-  if (!user) {
-    return (
-      <>
-        <GoogleAnalytics />
-        <SEO {...SEO_PAGES.home} />
-        <Suspense fallback={<PageLoader />}>
-          <Login onLogin={u => login(u, localStorage.getItem('token'))} />
-        </Suspense>
-      </>
-    );
-  }
-
+  // ── Public portfolio — visible to everyone, no login needed ───
   if (loading) return <PageLoader />;
 
   const seo = SEO_PAGES[activePage] || SEO_PAGES.home;
